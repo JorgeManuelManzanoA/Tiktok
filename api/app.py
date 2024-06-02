@@ -9,7 +9,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Configuración de la conexión a MongoDB
-client = MongoClient('mongodb://34.23.237.38:27017/')
+client = MongoClient('mongodb://user:T1kt0kcl0n_@34.23.237.38:27017/')
 db = client['Examen3']
 watch_times_collection = db['tiktok']
 videos_collection = db['videos']
@@ -77,4 +77,4 @@ def get_videos():
     return jsonify({"videos": videos})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True)
