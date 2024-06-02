@@ -1,6 +1,6 @@
 flask
 flask_cors
 pymongo
-google.cloud
+googlecloud.storage
 flask_redis
 os
