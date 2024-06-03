@@ -4,22 +4,25 @@ import FooterRight from './FooterRight';
 import './VideoCard.css';
 
 const VideoCard = (props) => {
-  const { url, username, description, song, likes, shares, comments, saves, profilePic, setVideoRef, autoplay, id } = props;
+  const { url, filename, description, song, likes, shares, comments, saves, setVideoRef, id } = props;
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (autoplay) {
+    // Autoplay el video si es necesario
+    if (props.autoplay) {
       videoRef.current.play();
     }
-  }, [autoplay]);
+  }, [props.autoplay]);
 
   useEffect(() => {
+    // Pasar la referencia del video al componente padre si es necesario
     if (setVideoRef) {
       setVideoRef(videoRef.current);
     }
   }, [setVideoRef]);
 
   const onVideoPress = () => {
+    // Pausar o reproducir el video al hacer clic en él
     if (videoRef.current.paused) {
       videoRef.current.play();
     } else {
@@ -29,21 +32,23 @@ const VideoCard = (props) => {
 
   return (
     <div className="video">
-      {/* The video element */}
+      {/* Elemento de video */}
       <video
         className="player"
         onClick={onVideoPress}
         ref={videoRef}
         loop
         src={url}
-        data-id={id}
+        data-id={id} // Asegúrate de que id sea un número
       ></video>
       <div className="bottom-controls">
         <div className="footer-left">
-          <FooterLeft username={username} description={description} song={song} />
+          {/* Componente para mostrar datos del video */}
+          <FooterLeft username={filename} description={description} song={song} />
         </div>
         <div className="footer-right">
-          <FooterRight likes={likes} shares={shares} comments={comments} saves={saves} profilePic={profilePic} />
+          {/* Componente para mostrar contadores de interacción */}
+          <FooterRight likes={likes} shares={shares} comments={comments} saves={saves} />
         </div>
       </div>
     </div>

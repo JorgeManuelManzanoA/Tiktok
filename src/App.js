@@ -1,120 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './App.css';
 import VideoCard from './components/VideoCard';
-
-// This array holds information about different videos
-const videoUrls = [
-  {
-    url: require('./videos/video1.mp4'),
-    id: 1,
-    username: 'video1',
-    description: 'Lol nvm #compsci #chatgpt #ai #openai #techtok',
-    song: 'Original sound - Famed Flames',
-    likes: 430,
-    comments: 13,
-    saves: 23,
-    shares: 1,
-  },
-  {
-    url: require('./videos/video2.mp4'),
-    id: 2,
-    username: 'video2',
-    description: 'Every developer brain @francesco.ciulla #developerjokes #programming #programminghumor #programmingmemes',
-    song: 'tarawarolin wants you to know this isnt my sound - Chaplain J Rob',
-    likes: '13.4K',
-    comments: 3121,
-    saves: 254,
-    shares: 420,
-  },
-  {
-    url: require('./videos/video3.mp4'),
-    id: 3,
-    username: 'video3',
-    description: '#programming #softwareengineer #vscode #programmerhumor #programmingmemes',
-    song: 'help so many people are using my sound - Ezra',
-    likes: 5438,
-    comments: 238,
-    saves: 12,
-    shares: 117,
-  },
-  {
-    url: require('./videos/video4.mp4'),
-    id: 4,
-    username: 'video4',
-    description: 'Wait for the end | Im RTX 4090 TI | #softwareengineer #softwareengineer #coding #codinglife #codingmemes ',
-    song: 'orijinal ses - Computer Science',
-    likes: 9689,
-    comments: 230,
-    saves: 1037,
-    shares: 967,
-  },
-  {
-    url: require('./videos/video5.mp4'),
-    id: 5,
-    username: 'video5',
-    description: 'Wait for the end | Im RTX 4090 TI | #softwareengineer #softwareengineer #coding #codinglife #codingmemes ',
-    song: 'orijinal ses - Computer Science',
-    likes: 9689,
-    comments: 230,
-    saves: 1037,
-    shares: 967,
-  },
-  {
-    url: require('./videos/video6.mp4'),
-    id: 6,
-    username: 'video6',
-    description: 'Wait for the end | Im RTX 4090 TI | #softwareengineer #softwareengineer #coding #codinglife #codingmemes ',
-    song: 'orijinal ses - Computer Science',
-    likes: 9689,
-    comments: 230,
-    saves: 1037,
-    shares: 967,
-  },
-  {
-    url: require('./videos/video7.mp4'),
-    id: 7,
-    username: 'video7',
-    description: 'Wait for the end | Im RTX 4090 TI | #softwareengineer #softwareengineer #coding #codinglife #codingmemes ',
-    song: 'orijinal ses - Computer Science',
-    likes: 9689,
-    comments: 230,
-    saves: 1037,
-    shares: 967,
-  },
-  {
-    url: require('./videos/video8.mp4'),
-    id: 8,
-    username: 'video8',
-    description: 'Wait for the end | Im RTX 4090 TI | #softwareengineer #softwareengineer #coding #codinglife #codingmemes ',
-    song: 'orijinal ses - Computer Science',
-    likes: 9689,
-    comments: 230,
-    saves: 1037,
-    shares: 967,
-  },
-  {
-    url: require('./videos/video9.mp4'),
-    id: 9,
-    username: 'video9',
-    description: 'Wait for the end | Im RTX 4090 TI | #softwareengineer #softwareengineer #coding #codinglife #codingmemes ',
-    song: 'orijinal ses - Computer Science',
-    likes: 9689,
-    comments: 230,
-    saves: 1037,
-    shares: 967,
-  },
-  {
-    url: require('./videos/video10.mp4'),
-    id: 10,
-    username: 'video10',
-    description: 'Wait for the end | Im RTX 4090 TI | #softwareengineer #softwareengineer #coding #codinglife #codingmemes ',
-    song: 'orijinal ses - Computer Science',
-    likes: 9689,
-    comments: 230,
-    saves: 1037,
-    shares: 967,
-  },
-];
+import axios from 'axios';
 
 function App() {
   const [videos, setVideos] = useState([]);
@@ -122,7 +9,14 @@ function App() {
   const videoTimestamps = useRef({});
 
   useEffect(() => {
-    setVideos(videoUrls);
+    // Llamada a la API para obtener los videos al cargar la aplicación
+    axios.get('http://localhost:5000/api/videos')
+      .then(response => {
+        setVideos(response.data.videos);
+      })
+      .catch(error => {
+        console.error('Error fetching videos:', error);
+      });
   }, []);
 
   useEffect(() => {
@@ -132,34 +26,46 @@ function App() {
       threshold: 0.8,
     };
 
+    let currentPlayingVideo = null; // Referencia al video actualmente en reproducción
+
     const handleIntersection = (entries) => {
       entries.forEach((entry) => {
         const videoElement = entry.target;
-        const videoId = videoElement.dataset.id;
+        const videoId = parseInt(videoElement.dataset.video_id); // Asegúrate de que sea un número válido
+        if (!isNaN(videoId)){ // Verifica si es un número válido
+          // Resto de la lógica aquí
+        } else {
+          console.log(`Video ID "${videoElement.dataset.video_id}" is not a valid number`);
+        }
         const currentTime = videoElement.currentTime;
         if (entry.isIntersecting) {
+          // Si hay un video en reproducción y no es el mismo que el actual,
+          // pausa el video anteriormente en reproducción.
+          if (currentPlayingVideo && currentPlayingVideo !== videoElement) {
+            currentPlayingVideo.pause();
+          }
           videoElement.play();
+          currentPlayingVideo = videoElement; // Actualiza la referencia al video en reproducción
           videoTimestamps.current[videoId] = currentTime;
         } else {
           videoElement.pause();
-          const elapsedTime = currentTime - videoTimestamps.current[videoId];
-          console.log(`Video ID: ${videoId}, Time watched: ${elapsedTime.toFixed(2)} seconds`);
-
-          // Send the data to the API
-          fetch('http://localhost:5000/api/video-watch-time', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ video_id: videoId, watch_time: elapsedTime.toFixed(2) })
-          })
-          .then(response => response.json())
-          .then(data => console.log('Success:', data))
-          .catch(error => console.error('Error:', error));
+          const startTime = videoTimestamps.current[videoId];
+          if (startTime !== undefined) {
+            const elapsedTime = currentTime - startTime;
+            console.log(`Video ID: ${videoId}, Time watched: ${elapsedTime.toFixed(2)} seconds`);
+    
+            // Enviar los datos a la API solo si hay un tiempo de inicio registrado
+            axios.post('http://localhost:5000/api/video-watch-time', {
+              video_id: videoId,
+              watch_time: elapsedTime.toFixed(2)
+            })
+            .then(response => console.log('Success:', response.data))
+            .catch(error => console.error('Error:', error));
+          }
         }
       });
     };
-
+    
     const observer = new IntersectionObserver(handleIntersection, observerOptions);
 
     Object.values(videoRefs.current).forEach((videoRef) => {
@@ -180,18 +86,18 @@ function App() {
       <div className="container">
         {videos.map((video) => (
           <VideoCard
-            key={video.id}
-            username={video.username}
-            description={video.description}
-            song={video.song}
-            likes={video.likes}
-            saves={video.saves}
-            comments={video.comments}
-            shares={video.shares}
-            url={video.url}
-            id={video.id}
-            setVideoRef={setVideoRef(video.id)}
-          />
+          key={video._id}
+          filename={video.filename}
+          description={video.description}
+          song={video.song}
+          likes={video.likes}
+          shares={video.shares}
+          comments={video.comments}
+          saves={video.saves}
+          url={video.url}
+          id={video.video_id} // Utiliza _id en lugar de video_id
+          setVideoRef={setVideoRef(video._id)}
+        />        
         ))}
       </div>
     </div>
