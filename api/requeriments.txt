@@ -1,6 +1,0 @@
-flask
-flask_cors
-pymongo
-googlecloud.storage
-flask_redis
-os
